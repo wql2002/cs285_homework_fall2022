@@ -51,10 +51,10 @@ def build_mlp(
     in_size = input_size
     for _ in range(n_layers):
         layers.append(nn.Linear(in_size, size))
-        layers.append(activation)
+        layers.append(activation())
         in_size = size
     layers.append(nn.Linear(in_size, output_size))
-    layers.append(output_activation)
+    layers.append(output_activation())
 
     return nn.Sequential(*layers)
 

@@ -81,10 +81,9 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             observation = obs[None]
 
         # TODO(done) return the action that the policy prescribes
-        observation = ptu.from_numpy(observation)
-        # get distribution from forward pass
-        action_distribution = self.forward(observation)
-        return ptu.to_numpy(action_distribution.sample())
+        observation = ptu.from_numpy(observation.astype(np.float32))
+        action = self(observation)
+        return ptu.to_numpy(action)
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -95,17 +94,15 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     # through it. For example, you can return a torch.FloatTensor. You can also
     # return more flexible objects, such as a
     # `torch.distributions.Distribution` object. It's up to you!
-    def forward(self, observation: torch.FloatTensor) -> distributions.Distribution:
+    def forward(self, observation: torch.FloatTensor) -> Any:
         # forward the nn model
         # input: observation
-        # output: action_distribution
+        # output: action
         if self.discrete:
-            # get Catagoical distribution from logits
-            return distributions.Categorical(logits = self.logits_na(observation))
-
+            logits = self.logits_na(observation)
+            return logits
         else:
-            # get Normal distribution from mean and std
-            return distributions.Normal(self.mean_net(observation), torch.exp(self.logstd)[None])
+            mean = self.mean_net(observation)
 
 
 
@@ -122,18 +119,12 @@ class MLPPolicySL(MLPPolicy):
             adv_n=None, acs_labels_na=None, qvals=None
     ):
         # TODO: update the policy and return the loss
-        # compare predicted actions (from input observations) with expert actions
+        # compare predicted actions (from input observations) with labeled actions
         # type of actions is array, so convert it to tensor
-        # action_tf = ptu.from_numpy(self.get_action(observations))
-        action_distribution = self.forward(ptu.from_numpy(observations))
-        action_tf = action_distribution.sample()
-        action_expert_tf = ptu.from_numpy(actions)
-        # create new tensor with gradient
-        # print("action_tf_grad: ", action_tf.requires_grad, "action_expert_tf_grad: ", action_expert_tf.requires_grad)
-        action_tf.requires_grad = True
-        action_expert_tf.requires_grad = True
-        # loss = self.loss(action_tf, action_tf)
-        loss = self.loss(action_tf, action_expert_tf)
+        action_tf = ptu.from_numpy(self.get_action(observations).astype(np.float32))
+        action_labels_tf = ptu.from_numpy(acs_labels_na.astype(np.float32))
+        # print(acs_tf.shape, acs_labels_tf.shape)
+        loss = self.loss(action_tf, action_labels_tf)
         
         # update nn weights
         self.optimizer.zero_grad()

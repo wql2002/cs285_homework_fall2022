@@ -41,7 +41,7 @@ def sample_trajectory(env, policy, max_path_length, render=False):
 
         # TODO(done) end the rollout if the rollout ended
         # HINT: rollout can end due to done, or due to max_path_length
-        rollout_done = 1 if steps>=max_path_length else done # HINT: this is either 0 or 1
+        rollout_done = done or (steps < max_path_length) # HINT: this is either 0 or 1
         terminals.append(rollout_done)
 
         if rollout_done:
@@ -53,7 +53,7 @@ def sample_trajectories(env, policy, min_timesteps_per_batch, max_path_length, r
     """
         Collect rollouts until we have collected min_timesteps_per_batch steps.
 
-        TODO(done) implement this function
+        TODO implement this function
         Hint1: use sample_trajectory to get each path (i.e. rollout) that goes into paths
         Hint2: use get_pathlength to count the timesteps collected in each path
     """
@@ -70,15 +70,12 @@ def sample_n_trajectories(env, policy, ntraj, max_path_length, render=False):
     """
         Collect ntraj rollouts.
 
-        TODO(done) implement this function
+        TODO implement this function
         Hint1: use sample_trajectory to get each path (i.e. rollout) that goes into paths
     """
     paths = []
 
-    # TODO(done)
-    for i in range(ntraj):
-        path = sample_trajectory(env, policy, max_path_length, render)
-        paths.append(path)
+    TODO
 
     return paths
 

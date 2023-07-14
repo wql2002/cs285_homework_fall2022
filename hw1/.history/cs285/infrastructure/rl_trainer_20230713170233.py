@@ -206,6 +206,12 @@ class RL_Trainer(object):
             # TODO(done) use the sampled data to train an agent
             # HINT: use the agent's train function
             # HINT: keep the agent's training log for debugging
+            # [DEBUG] print all inputs shapes
+            # print("ob_batch.shape: ", ob_batch.shape)
+            # print("ac_batch.shape: ", ac_batch.shape)
+            # print("re_batch.shape: ", re_batch.shape)
+            # print("next_ob_batch.shape: ", next_ob_batch.shape)
+            # print("terminal_batch.shape: ", terminal_batch.shape)
             train_log = self.agent.train(ob_batch, ac_batch, re_batch, next_ob_batch, terminal_batch)
             all_logs.append(train_log)
         return all_logs
@@ -216,8 +222,7 @@ class RL_Trainer(object):
         # TODO relabel collected obsevations (from our policy) with labels from an expert policy
         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
-        for path in paths:
-            path['action'] = expert_policy.get_action(path['observation'])
+
         return paths
 
     ####################################

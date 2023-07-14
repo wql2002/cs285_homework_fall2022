@@ -113,7 +113,6 @@ class RL_Trainer(object):
                 self.params['batch_size']
             )  # HW1: implement this function below (done)
             paths, envsteps_this_batch, train_video_paths = training_returns
-            # print("[DEBUG] paths.shape: ", paths.shape)
             self.total_envsteps += envsteps_this_batch
 
             # relabel the collected obs with actions from a provided expert policy
@@ -172,7 +171,7 @@ class RL_Trainer(object):
         if itr == 0:
             # load initial expert data from .pkl file
             with open(load_initial_expertdata, 'rb') as f:
-                loaded_paths = pickle.load(f)
+                loaded_paths = pickle.load(f.read())
             return loaded_paths, 0, None
             
         # TODO(done) collect `batch_size` samples to be used for training
@@ -216,8 +215,7 @@ class RL_Trainer(object):
         # TODO relabel collected obsevations (from our policy) with labels from an expert policy
         # HINT: query the policy (using the get_action function) with paths[i]["observation"]
         # and replace paths[i]["action"] with these expert labels
-        for path in paths:
-            path['action'] = expert_policy.get_action(path['observation'])
+
         return paths
 
     ####################################
@@ -227,7 +225,6 @@ class RL_Trainer(object):
 
         # collect eval trajectories, for logging
         print("\nCollecting data for eval...")
-        print("eval_batch_size: ", self.params['eval_batch_size'], " ep_len: ", self.params['ep_len'])
         eval_paths, eval_envsteps_this_batch = utils.sample_trajectories(self.env, eval_policy, self.params['eval_batch_size'], self.params['ep_len'])
 
         # save eval rollouts as videos in tensorboard event file

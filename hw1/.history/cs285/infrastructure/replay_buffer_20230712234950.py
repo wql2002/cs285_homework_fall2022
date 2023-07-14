@@ -33,7 +33,6 @@ class ReplayBuffer(object):
         # our arrays
         observations, actions, rewards, next_observations, terminals = (
             convert_listofrollouts(paths, concat_rew))
-        
 
         if self.obs is None:
             self.obs = observations[-self.max_size:]

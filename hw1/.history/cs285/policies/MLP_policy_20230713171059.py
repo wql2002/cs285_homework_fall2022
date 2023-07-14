@@ -129,7 +129,7 @@ class MLPPolicySL(MLPPolicy):
         action_tf = action_distribution.sample()
         action_expert_tf = ptu.from_numpy(actions)
         # create new tensor with gradient
-        # print("action_tf_grad: ", action_tf.requires_grad, "action_expert_tf_grad: ", action_expert_tf.requires_grad)
+        print("action_tf_grad: ", action_tf.requires_grad, "action_expert_tf_grad: ", action_expert_tf.requires_grad)
         action_tf.requires_grad = True
         action_expert_tf.requires_grad = True
         # loss = self.loss(action_tf, action_tf)

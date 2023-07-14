@@ -81,7 +81,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
             observation = obs[None]
 
         # TODO(done) return the action that the policy prescribes
-        observation = ptu.from_numpy(observation)
+        observation = ptu.from_numpy(observation.astype(np.float32))
         # get distribution from forward pass
         action_distribution = self.forward(observation)
         return ptu.to_numpy(action_distribution.sample())
@@ -98,7 +98,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
     def forward(self, observation: torch.FloatTensor) -> distributions.Distribution:
         # forward the nn model
         # input: observation
-        # output: action_distribution
+        # output: action
         if self.discrete:
             # get Catagoical distribution from logits
             return distributions.Categorical(logits = self.logits_na(observation))
@@ -122,18 +122,12 @@ class MLPPolicySL(MLPPolicy):
             adv_n=None, acs_labels_na=None, qvals=None
     ):
         # TODO: update the policy and return the loss
-        # compare predicted actions (from input observations) with expert actions
+        # compare predicted actions (from input observations) with labeled actions
         # type of actions is array, so convert it to tensor
-        # action_tf = ptu.from_numpy(self.get_action(observations))
-        action_distribution = self.forward(ptu.from_numpy(observations))
-        action_tf = action_distribution.sample()
-        action_expert_tf = ptu.from_numpy(actions)
-        # create new tensor with gradient
-        # print("action_tf_grad: ", action_tf.requires_grad, "action_expert_tf_grad: ", action_expert_tf.requires_grad)
-        action_tf.requires_grad = True
-        action_expert_tf.requires_grad = True
-        # loss = self.loss(action_tf, action_tf)
-        loss = self.loss(action_tf, action_expert_tf)
+        action_tf = ptu.from_numpy(self.get_action(observations).astype(np.float32))
+        action_labels_tf = ptu.from_numpy(acs_labels_na.astype(np.float32))
+        # print(acs_tf.shape, acs_labels_tf.shape)
+        loss = self.loss(action_tf, action_labels_tf)
         
         # update nn weights
         self.optimizer.zero_grad()
