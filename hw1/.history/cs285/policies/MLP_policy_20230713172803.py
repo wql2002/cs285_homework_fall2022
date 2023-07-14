@@ -126,7 +126,7 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         # compare predicted actions (from input observations) with expert actions
         # type of actions is array, so convert it to tensor
-        action_tf = self.forward(ptu.from_numpy(observations))
+        action_tf = ptu.from_numpy(self.get_action(observations))
         action_expert_tf = ptu.from_numpy(actions)
         # create new tensor with gradient
         loss = self.loss(action_tf, action_expert_tf)

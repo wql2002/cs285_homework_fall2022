@@ -83,6 +83,8 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # TODO(done) return the action that the policy prescribes
         observation = ptu.from_numpy(observation)
         # get distribution from forward pass
+        # action_distribution = self.forward(observation)
+        # return ptu.to_numpy(action_distribution.sample())
         return ptu.to_numpy(self.forward(observation))
 
     # update/train this policy
@@ -102,12 +104,14 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         if self.discrete:
             # get Catagoical distribution from logits
             # return distributions.Categorical(logits = self.logits_na(observation))
-            return self.logits_na(observation)
+            return distributions.Categorical(logits = self.logits_na(observation)).sample()
+            # return self.logits_na(observation)
 
         else:
             # get Normal distribution from mean and std
             # return distributions.Normal(self.mean_net(observation), torch.exp(self.logstd)[None])
-            return self.mean_net(observation)
+            return distributions.Normal(self.mean_net(observation), torch.exp(self.logstd)[None]).sample()
+            # return self.mean_net(observation)
 
 
 
@@ -126,7 +130,7 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         # compare predicted actions (from input observations) with expert actions
         # type of actions is array, so convert it to tensor
-        action_tf = self.forward(ptu.from_numpy(observations))
+        action_tf = ptu.from_numpy(self.get_action(observations))
         action_expert_tf = ptu.from_numpy(actions)
         # create new tensor with gradient
         loss = self.loss(action_tf, action_expert_tf)

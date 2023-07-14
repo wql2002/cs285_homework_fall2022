@@ -83,7 +83,8 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
         # TODO(done) return the action that the policy prescribes
         observation = ptu.from_numpy(observation)
         # get distribution from forward pass
-        return ptu.to_numpy(self.forward(observation))
+        action_distribution = self.forward(observation)
+        return ptu.to_numpy(action_distribution.sample())
 
     # update/train this policy
     def update(self, observations, actions, **kwargs):
@@ -106,8 +107,7 @@ class MLPPolicy(BasePolicy, nn.Module, metaclass=abc.ABCMeta):
 
         else:
             # get Normal distribution from mean and std
-            # return distributions.Normal(self.mean_net(observation), torch.exp(self.logstd)[None])
-            return self.mean_net(observation)
+            return distributions.Normal(self.mean_net(observation), torch.exp(self.logstd)[None])
 
 
 
@@ -126,9 +126,15 @@ class MLPPolicySL(MLPPolicy):
         # TODO: update the policy and return the loss
         # compare predicted actions (from input observations) with expert actions
         # type of actions is array, so convert it to tensor
-        action_tf = self.forward(ptu.from_numpy(observations))
+        # action_tf = ptu.from_numpy(self.get_action(observations))
+        action_distribution = self.forward(ptu.from_numpy(observations))
+        action_tf = action_distribution.sample()
         action_expert_tf = ptu.from_numpy(actions)
         # create new tensor with gradient
+        # print("action_tf_grad: ", action_tf.requires_grad, "action_expert_tf_grad: ", action_expert_tf.requires_grad)
+        action_tf.requires_grad = True
+        action_expert_tf.requires_grad = True
+        # loss = self.loss(action_tf, action_tf)
         loss = self.loss(action_tf, action_expert_tf)
         
         # update nn weights
